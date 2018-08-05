@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Nitka Inc., тестовое задание "Касса кинотеатра"</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <style>
+        .wrapper {
+            display: -webkit-flex;
+            display: -ms-flex;
+            display: flex;
+        }
+
+        .cinema-hall {
+            border: 2px solid gray;
+            padding: 20px;
+        }
+
+        .cinema-hall__row {
+            display: -webkit-flex;
+            display: -ms-flex;
+            display: flex;
+        }
+
+        .cinema-hall__row + .cinema-hall__row {
+            margin-top: 20px;
+        }
+
+        .cinema-hall__seat {
+            border: 2px solid gray;
+            border-radius: 5px;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            background: limegreen;
+            opacity: 0.8;
+            transition: 0.2s;
+        }
+
+        .cinema-hall__seat:hover {
+            opacity: 1;
+        }
+
+        .cinema-hall__seat._reserved {
+            background: yellow;
+            opacity: 1;
+        }
+
+        .cinema-hall__seat._bought {
+            background: red;
+            pointer-events: none;
+            opacity: 1;
+        }
+
+        .cinema-hall__seat + .cinema-hall__seat {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script>
+        var element = document.getElementById('app');
+
+        var app = new Vue({
+            template:
+                `
+                <div class="wrapper">
+                    <div class="cinema-hall">
+                        <div
+                          v-for="row, index in hallScheme"
+                          :key="'row' + index"
+                          class="cinema-hall__row"
+                         >
+                            <div
+                              v-for="seat, index in row"
+                              :key="'seat' + index"
+                              class="cinema-hall__seat"
+                              :class="[
+                                  { '_reserved': seat.isReserved },
+                                  { '_bought': seat.isBought },
+                              ]"
+                            >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `
+            ,
+            data: function() {
+                return {
+                    hallScheme: [],
+                };
+            },
+            created: function() {
+                this.getСinemaHall();
+                this.getBoughtData();
+            },
+            methods: {
+                getСinemaHall: function() {
+                    var scheme = [];
+
+                    for (var i = 1; i < 11; i++) {
+                        var row = [];
+
+                        for (var k = 1; k < 11; k++) {
+                            var seat = {
+                                'row': i,
+                                'seat': k,
+                                'isReserved': false,
+                                'isBought': false,
+                            }
+
+                            row.push(seat);
+                        }
+
+                        scheme.push(row);
+                    }
+
+                    this.hallScheme = scheme;
+                },
+                getBoughtData: function() {
+                    for (var i = 0; i < 10; i++) {
+                        console.log(this.setRandomizedSeat());
+                    }
+                },
+                setRandomizedSeat: function() {
+                    var randomRow = Math.floor(Math.random() * this.hallScheme.length);
+                    var randomSeat = Math.floor(Math.random() * this.hallScheme[randomRow].length);
+
+                    if (this.hallScheme[randomRow][randomSeat].isBought) {
+                        console.log('ayayai!')
+                        return this.setRandomizedSeat();
+                    }
+
+                    this.hallScheme[randomRow][randomSeat].isBought = true;
+
+                    return randomRow + ' ' + randomSeat;
+                },
+            },
+        }).$mount(element);
+    </script>
+</body>
+</html>

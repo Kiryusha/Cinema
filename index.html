@@ -9,9 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <style>
         .wrapper {
-            display: -webkit-flex;
-            display: -ms-flex;
-            display: flex;
+            display: inline-block;
+            font-family: 'Roboto Slab', serif;
+            position: relative;
         }
 
         .cinema-hall {
@@ -58,6 +58,74 @@
         .cinema-hall__seat + .cinema-hall__seat {
             margin-left: 10px;
         }
+        .status-window {
+            width: 225px;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: -225px;
+            border: 2px solid gray;
+            border-left: none;
+            display: -webkit-flex;
+            display: -ms-flex;
+            display: flex;
+            -webkit-flex-direction: column;
+            -ms-flex-direction: column;
+            flex-direction: column;
+        }
+        .status-window__text-block {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: auto;
+            max-height: calc(100% - 65px);
+        }
+        .status-window__controls {
+            flex-grow: 0;
+            padding: 15px 20px 20px;
+            border-top: 2px solid gray;
+        }
+        .status-window__price {
+            margin-bottom: 15px;
+        }
+        .status-window__buttons {
+            display: -webkit-flex;
+            display: -ms-flex;
+            display: flex;
+            justify-content: space-between;
+        }
+        .status-window__button {
+            font-family: 'Roboto Slab', serif;
+            outline: none;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: .25rem;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+        .status-window__button._submit{
+            color: #fff;
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        .status-window__button._dismiss{
+            color: #fff;
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .status-window__button:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -71,19 +139,40 @@
                 <div class="wrapper">
                     <div class="cinema-hall">
                         <div
-                          v-for="row, index in hallScheme"
-                          :key="'row' + index"
+                          v-for="row, rowIndex in hallScheme"
+                          :key="'row' + rowIndex"
                           class="cinema-hall__row"
                          >
                             <div
-                              v-for="seat, index in row"
-                              :key="'seat' + index"
+                              v-for="seat, seatIndex in row"
+                              :key="'seat' + seatIndex"
                               class="cinema-hall__seat"
                               :class="[
                                   { '_reserved': seat.isReserved },
                                   { '_bought': seat.isBought },
                               ]"
+                              @click="toggleSeat(rowIndex, seatIndex)"
                             >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-window">
+                        <div class="status-window__text-block">
+                            <div v-for="line in statusText" class="status-window__text-line">
+                                {{ line }}
+                            </div>
+                            <div v-if="thankYouText && !statusText.length">
+                                {{ thankYouText }}
+                            </div>
+                        </div>
+                        <div class="status-window__controls">
+                            <div v-if="mutualPrice" class="status-window__price">
+                                Общая стоймость:<br>
+                                {{ priceText }}
+                            </div>
+                            <div class="status-window__buttons">
+                                <button class="status-window__button _submit" @click="submitAll" :disabled="!mutualPrice">Купить</button>
+                                <button class="status-window__button _dismiss" @click="dismissAll">Отмена</button>
                             </div>
                         </div>
                     </div>
@@ -93,7 +182,48 @@
             data: function() {
                 return {
                     hallScheme: [],
+                    price: 100,
+                    thankYouText: '',
                 };
+            },
+            computed: {
+                statusText() {
+                    var textLines = [];
+                    var isFirst = true;
+
+                    for (var k = 0; k < this.hallScheme.length; k++) {
+                        for (var i = 0; i < this.hallScheme[k].length; i++) {
+                            if (this.hallScheme[k][i].isReserved) {
+                                if (isFirst) {
+                                    textLines.push('Вы выбрали места:');
+                                    textLines.push(`ряд ${k} место ${i}`);
+                                    isFirst = false;
+                                } else {
+                                    textLines[textLines.length - 1] += ',';
+                                    textLines.push(`ряд ${k} место ${i}`);
+                                }
+                            }
+                        }
+                    }
+
+                    return textLines;
+                },
+                mutualPrice() {
+                    var counter = 0;
+
+                    for (var k = 0; k < this.hallScheme.length; k++) {
+                        for (var i = 0; i < this.hallScheme[k].length; i++) {
+                            if (this.hallScheme[k][i].isReserved) {
+                                counter += 1;
+                            }
+                        }
+                    }
+
+                    return counter * this.price;
+                },
+                priceText() {
+                    return `${this.mutualPrice} руб.`;
+                }
             },
             created: function() {
                 this.getСinemaHall();
@@ -124,7 +254,7 @@
                 },
                 getBoughtData: function() {
                     for (var i = 0; i < 10; i++) {
-                        console.log(this.setRandomizedSeat());
+                        this.setRandomizedSeat();
                     }
                 },
                 setRandomizedSeat: function() {
@@ -132,13 +262,37 @@
                     var randomSeat = Math.floor(Math.random() * this.hallScheme[randomRow].length);
 
                     if (this.hallScheme[randomRow][randomSeat].isBought) {
-                        console.log('ayayai!')
                         return this.setRandomizedSeat();
                     }
 
                     this.hallScheme[randomRow][randomSeat].isBought = true;
 
                     return randomRow + ' ' + randomSeat;
+                },
+                toggleSeat: function(row, seat) {
+                    if (!this.hallScheme[row][seat].isBought) {
+                        this.thankYouText = '';
+                        this.hallScheme[row][seat].isReserved = !this.hallScheme[row][seat].isReserved;
+                    }
+                },
+                dismissAll: function() {
+                    for (var k = 0; k < this.hallScheme.length; k++) {
+                        for (var i = 0; i < this.hallScheme[k].length; i++) {
+                            this.hallScheme[k][i].isReserved = false;
+                        }
+                    }
+                },
+                submitAll: function() {
+                    for (var k = 0; k < this.hallScheme.length; k++) {
+                        for (var i = 0; i < this.hallScheme[k].length; i++) {
+                            if (this.hallScheme[k][i].isReserved) {
+                                this.hallScheme[k][i].isReserved = false;
+                                this.hallScheme[k][i].isBought = true;
+                            }
+                        }
+                    }
+
+                    this.thankYouText = 'Спасибо за заказ!';
                 },
             },
         }).$mount(element);

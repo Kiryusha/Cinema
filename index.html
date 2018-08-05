@@ -179,7 +179,7 @@
                 </div>
                 `
             ,
-            data: function() {
+            data() {
                 return {
                     hallScheme: [],
                     price: 100,
@@ -225,12 +225,12 @@
                     return `${this.mutualPrice} руб.`;
                 }
             },
-            created: function() {
+            created() {
                 this.getСinemaHall();
                 this.getBoughtData();
             },
             methods: {
-                getСinemaHall: function() {
+                getСinemaHall() {
                     var scheme = [];
 
                     for (var i = 1; i < 11; i++) {
@@ -252,12 +252,12 @@
 
                     this.hallScheme = scheme;
                 },
-                getBoughtData: function() {
+                getBoughtData() {
                     for (var i = 0; i < 10; i++) {
                         this.setRandomizedSeat();
                     }
                 },
-                setRandomizedSeat: function() {
+                setRandomizedSeat() {
                     var randomRow = Math.floor(Math.random() * this.hallScheme.length);
                     var randomSeat = Math.floor(Math.random() * this.hallScheme[randomRow].length);
 
@@ -266,23 +266,21 @@
                     }
 
                     this.hallScheme[randomRow][randomSeat].isBought = true;
-
-                    return randomRow + ' ' + randomSeat;
                 },
-                toggleSeat: function(row, seat) {
+                toggleSeat(row, seat) {
                     if (!this.hallScheme[row][seat].isBought) {
                         this.thankYouText = '';
                         this.hallScheme[row][seat].isReserved = !this.hallScheme[row][seat].isReserved;
                     }
                 },
-                dismissAll: function() {
+                dismissAll() {
                     for (var k = 0; k < this.hallScheme.length; k++) {
                         for (var i = 0; i < this.hallScheme[k].length; i++) {
                             this.hallScheme[k][i].isReserved = false;
                         }
                     }
                 },
-                submitAll: function() {
+                submitAll() {
                     for (var k = 0; k < this.hallScheme.length; k++) {
                         for (var i = 0; i < this.hallScheme[k].length; i++) {
                             if (this.hallScheme[k][i].isReserved) {

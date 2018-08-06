@@ -13,22 +13,18 @@
             font-family: 'Roboto Slab', serif;
             position: relative;
         }
-
         .cinema-hall {
             border: 2px solid gray;
             padding: 20px;
         }
-
         .cinema-hall__row {
             display: -webkit-flex;
             display: -ms-flex;
             display: flex;
         }
-
         .cinema-hall__row + .cinema-hall__row {
             margin-top: 20px;
         }
-
         .cinema-hall__seat {
             border: 2px solid gray;
             border-radius: 5px;
@@ -39,22 +35,18 @@
             opacity: 0.8;
             transition: 0.2s;
         }
-
         .cinema-hall__seat:hover {
             opacity: 1;
         }
-
         .cinema-hall__seat._reserved {
             background: yellow;
             opacity: 1;
         }
-
         .cinema-hall__seat._bought {
             background: red;
             pointer-events: none;
             opacity: 1;
         }
-
         .cinema-hall__seat + .cinema-hall__seat {
             margin-left: 10px;
         }
@@ -132,7 +124,6 @@
     <div id="app"></div>
     <script>
         var element = document.getElementById('app');
-
         var app = new Vue({
             template:
                 `
@@ -190,27 +181,24 @@
                 statusText() {
                     var textLines = [];
                     var isFirst = true;
-
                     for (var k = 0; k < this.hallScheme.length; k++) {
                         for (var i = 0; i < this.hallScheme[k].length; i++) {
                             if (this.hallScheme[k][i].isReserved) {
                                 if (isFirst) {
                                     textLines.push('Вы выбрали места:');
-                                    textLines.push(`ряд ${k} место ${i}`);
+                                    textLines.push(`ряд ${k + 1} место ${i + 1}`);
                                     isFirst = false;
                                 } else {
                                     textLines[textLines.length - 1] += ',';
-                                    textLines.push(`ряд ${k} место ${i}`);
+                                    textLines.push(`ряд ${k + 1} место ${i + 1}`);
                                 }
                             }
                         }
                     }
-
                     return textLines;
                 },
                 mutualPrice() {
                     var counter = 0;
-
                     for (var k = 0; k < this.hallScheme.length; k++) {
                         for (var i = 0; i < this.hallScheme[k].length; i++) {
                             if (this.hallScheme[k][i].isReserved) {
@@ -218,7 +206,6 @@
                             }
                         }
                     }
-
                     return counter * this.price;
                 },
                 priceText() {
@@ -232,10 +219,8 @@
             methods: {
                 getСinemaHall() {
                     var scheme = [];
-
                     for (var i = 1; i < 11; i++) {
                         var row = [];
-
                         for (var k = 1; k < 11; k++) {
                             var seat = {
                                 'row': i,
@@ -243,13 +228,10 @@
                                 'isReserved': false,
                                 'isBought': false,
                             }
-
                             row.push(seat);
                         }
-
                         scheme.push(row);
                     }
-
                     this.hallScheme = scheme;
                 },
                 getBoughtData() {
@@ -260,11 +242,9 @@
                 setRandomizedSeat() {
                     var randomRow = Math.floor(Math.random() * this.hallScheme.length);
                     var randomSeat = Math.floor(Math.random() * this.hallScheme[randomRow].length);
-
                     if (this.hallScheme[randomRow][randomSeat].isBought) {
                         return this.setRandomizedSeat();
                     }
-
                     this.hallScheme[randomRow][randomSeat].isBought = true;
                 },
                 toggleSeat(row, seat) {
@@ -289,7 +269,6 @@
                             }
                         }
                     }
-
                     this.thankYouText = 'Спасибо за заказ!';
                 },
             },
